@@ -19,13 +19,13 @@ This project implements a production-grade data engineering workflow that transf
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Transport   │───▶│  Normalize   │───▶│  Assemble    │───▶│   Label     │
-│  (fetch)     │    │  (clean)     │    │  (features)  │    │  (targets)  │
+│  Transport  │───▶│  Normalize  │───▶│  Assemble   │───▶│   Label     │
+│  (fetch)    │    │  (clean)    │    │  (features) │    │  (targets)  │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
                                                                 │
                                                                 ▼
                                                          ┌─────────────┐
-                                              ┌─────────▶│   Export     │
+                                              ┌─────────▶│   Export    │
                                               │          │  (CPT/SFT)  │
                                               │          └─────────────┘
                                               │                │
