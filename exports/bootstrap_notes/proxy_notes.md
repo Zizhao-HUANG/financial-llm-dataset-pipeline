@@ -6,7 +6,7 @@ To run the pipeline in `--mode=online`, the application requires the following e
 
 ```bash
 # Replace with your actual Bright Data credentials
-export BRD_USERNAME_BASE="brd-customer-hl_xxxxxxxx-zone-datacenter_proxy_akshare"
+export BRD_USERNAME_BASE="brd-customer-hl_XXXXXXXX-zone-datacenter_proxy_akshare"
 export BRD_PASSWORD="your_brightdata_password"
 ```
 The application will automatically handle session rotation (e.g., `-session-12345`).
@@ -20,14 +20,5 @@ If you need to test your proxy connection manually, you can use a `curl` command
 curl -i \
   --proxy brd.superproxy.io:33335 \
   --proxy-user "your_username_base-session-123456:your_password" \
-  "https://geo.brdtest.com/mygeo.json"
-```
-
-Example with real credentials from the prompt:
-```bash
-# This is for reference only. Use your own credentials set as environment variables.
-curl -i \
-  --proxy brd.superproxy.io:33335 \
-  --proxy-user "brd-customer-hl_9dd366c9-zone-datacenter_proxy_akshare-session-123456:cmr7u79n60j0" \
   "https://geo.brdtest.com/mygeo.json"
 ```
