@@ -1,0 +1,48 @@
+# This file defines the schema for all features that will be used in the model.
+# It specifies data types, transformations (like Winsorizing), and strategies
+# for handling missing values. This ensures consistency and reproducibility.
+
+# Global default settings that apply to all features unless overridden.
+defaults:
+  missing_strategy: keep_nan # Default is to not fill missing values.
+
+schema:
+  # --- Price and Volume Features ---
+  # These are the core features derived from market data.
+  - name: open
+    dtype: float64
+  - name: high
+    dtype: float64
+  - name: low
+    dtype: float64
+  - name: close
+    dtype: float64
+  - name: volume
+    dtype: float64
+  - name: amount
+    dtype: float64
+    winsorize: # Example of a transformation to handle extreme outliers.
+      lower_quantile: 0.001
+      upper_quantile: 0.999
+  - name: turnover
+    dtype: float64
+  - name: adj_close_hfq
+    dtype: float64
+
+  # --- Metadata Features ---
+  # These features provide context about the stock's status.
+  - name: is_member
+    dtype: int8
+    missing_strategy: fill_zero # If missing, assume it's not a member.
+  - name: is_suspended
+    dtype: int8
+    missing_strategy: fill_zero # If missing, assume it's not suspended.
+
+  # --- Example of a Financial Ratio ---
+  # This section can be expanded with more features later.
+  # - name: pe_ttm
+  #   dtype: float64
+  #   winsorize:
+  #     lower_quantile: 0.01
+  #     upper_quantile: 0.99
+  #   missing_strategy: forward_fill

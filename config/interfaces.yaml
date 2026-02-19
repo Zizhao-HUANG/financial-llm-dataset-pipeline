@@ -1,0 +1,379 @@
+# This file registers the data interfaces, their properties, and how to handle them.
+# It's used by the data pipeline to understand what to fetch and how to process it.
+# For the offline bootstrap, we will reference the local CSV files.
+
+interfaces:
+  # Price data: using stock_zh_a_hist as the primary source for price/volume.
+  # The user suggested this as a better alternative to stock_zh_a_daily.
+  - id: stock_zh_a_hist
+    source_domain: sina  # Represents the original data source, though we use local files.
+    freq: D  # Daily frequency.
+    scope: single_stock_date_range
+    avail_rule: T_day_1500  # Data is available at 15:00 on day T.
+    columns_map: # Maps original column names (if different) to our standard names.
+      日期: date
+      开盘: open
+      收盘: close
+      最高: high
+      最低: low
+      成交量: volume
+      成交额: amount
+      换手率: turnover
+      后复权价: adj_close_hfq
+    # In bootstrap mode, the runner will look for this file pattern.
+    bootstrap_source: price_{ticker}.csv
+
+  # Trading calendar: provides the list of all trading days.
+  - id: tool_trade_date_hist_sina
+    source_domain: sina
+    freq: static # This data is static and doesn't change daily.
+    scope: market_wide
+    avail_rule: T_day_1500
+    columns_map:
+      trade_date: date
+    bootstrap_source: trading_calendar.csv
+
+  # Interface for live online testing
+  - id: stock_gpzy_pledge_ratio_em
+    source_domain: eastmoney.com
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: [date] # YYYYMMDD
+
+  # --- A. Exchange Overview & Sector Trading ---
+  - id: stock_szse_summary
+    source_domain: szse.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYYMMDD
+
+  - id: stock_szse_sector_summary
+    source_domain: szse.cn
+    freq: M_Y # Monthly or Yearly
+    scope: market_wide_date_range
+    avail_rule: T_plus_5
+    params: [symbol, date] # symbol="当月" or "当年", date=YYYYMMDD
+
+  - id: stock_sse_deal_daily
+    source_domain: sse.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYY-MM-DD
+
+  # --- C. Company Calendar/Dynamics ---
+  - id: stock_gsrl_gsdt_em
+    source_domain: eastmoney.com
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1 # Refers to announcements after market close
+    params: [date] # YYYYMMDD
+
+  - id: stock_tfp_em
+    source_domain: eastmoney.com
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500 # Effective next day
+    params: [date] # YYYYMMDD
+
+  - id: news_trade_notify_suspend_baidu
+    source_domain: baidu.com
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: [symbol] # "A股"
+
+  # --- D. Financial Reports ---
+  - id: stock_yjbb_em
+    source_domain: eastmoney.com
+    freq: Q_A # Quarterly/Annual
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20230331"
+
+  - id: stock_yjkb_em
+    source_domain: eastmoney.com
+    freq: Q_A
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20230331"
+
+  - id: stock_yjyg_em
+    source_domain: eastmoney.com
+    freq: Q_A
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20230331"
+
+  - id: stock_yysj_em
+    source_domain: eastmoney.com
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: []
+
+  - id: stock_report_disclosure
+    source_domain: cninfo.com.cn
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: [market, date] # market="沪深", date="YYYY-MM-DD"
+
+  # --- E. Structure & Events ---
+  - id: stock_industry_change_cninfo
+    source_domain: cninfo.com.cn
+    freq: event
+    scope: single_stock_history
+    avail_rule: change_date
+    params: [symbol] # "300059"
+
+  - id: stock_share_change_cninfo
+    source_domain: cninfo.com.cn
+    freq: event
+    scope: single_stock_date_range
+    avail_rule: change_date
+    params: [symbol, start_date, end_date]
+
+  - id: stock_allotment_cninfo
+    source_domain: cninfo.com.cn
+    freq: event
+    scope: single_stock_history
+    avail_rule: announcement_date
+    params: [symbol] # "300059"
+
+  # --- F. Financial Statements ---
+  - id: stock_zcfz_em
+    source_domain: eastmoney.com
+    freq: Q_A
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20231231"
+
+  - id: stock_lrb_em
+    source_domain: eastmoney.com
+    freq: Q_A
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20231231"
+
+  - id: stock_xjll_em
+    source_domain: eastmoney.com
+    freq: Q_A
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "20231231"
+
+  # --- G. Dividends & Contracts ---
+  - id: stock_fhps_em
+    source_domain: eastmoney.com
+    freq: A_H # Annual/Semi-annual
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "2023"
+
+  - id: stock_zdhtmx_em
+    source_domain: eastmoney.com
+    freq: event
+    scope: market_wide_date_range
+    avail_rule: announcement_date
+    params: [start_date, end_date] # YYYYMMDD
+
+  - id: stock_notice_report
+    source_domain: eastmoney.com
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: announcement_date
+    params: [date] # YYYY-MM-DD
+
+  # --- H. Shareholders & Holdings ---
+  - id: stock_gdfx_free_top_10_em
+    source_domain: eastmoney.com
+    freq: Q
+    scope: single_stock_by_report_date
+    avail_rule: announcement_date
+    params: [symbol, date] # symbol="600519", date="20231231"
+
+  - id: stock_gdfx_top_10_em
+    source_domain: eastmoney.com
+    freq: Q
+    scope: single_stock_by_report_date
+    avail_rule: announcement_date
+    params: [symbol, date]
+
+  - id: stock_gdfx_free_holding_change_em
+    source_domain: eastmoney.com
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date]
+
+  - id: stock_gdfx_holding_change_em
+    source_domain: eastmoney.com
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date]
+
+  - id: stock_gdfx_free_holding_detail_em
+    source_domain: eastmoney.com
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date]
+
+  # --- I. Listings/Delistings ---
+  - id: stock_info_a_code_name
+    source_domain: akshare
+    freq: static
+    scope: market_wide
+    avail_rule: T_day_1500
+    params: []
+
+  - id: stock_info_sz_delist
+    source_domain: szse.cn
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: []
+
+  - id: stock_info_sh_delist
+    source_domain: sse.com.cn
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: []
+
+  # --- J. Shareholder Numbers & Fund Holdings ---
+  - id: stock_hold_num_cninfo
+    source_domain: cninfo.com.cn
+    freq: Q
+    scope: single_stock_date_range
+    avail_rule: announcement_date
+    params: [symbol, start_date, end_date]
+
+  - id: stock_report_fund_hold
+    source_domain: eastmoney.com
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [symbol, date] # symbol="全部", date="2023"
+
+  # --- K. Dragon & Tiger List ---
+  - id: stock_lhb_detail_daily_sina
+    source_domain: sina.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [trade_date, symbol] # trade_date="20240104", symbol="全部"
+
+  # --- L. Margin Trading & Short Selling ---
+  - id: stock_margin_ratio_pa
+    source_domain: pingan.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYY-MM-DD
+
+  - id: stock_margin_sse
+    source_domain: sse.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [start_date, end_date] # YYYYMMDD
+
+  - id: stock_margin_detail_sse
+    source_domain: sse.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYYMMDD
+
+  - id: stock_margin_szse
+    source_domain: szse.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYYMMDD
+
+  - id: stock_margin_detail_szse
+    source_domain: szse.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_plus_1
+    params: [date] # YYYYMMDD
+
+  - id: stock_margin_underlying_info_szse
+    source_domain: szse.cn
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: [date] # YYYYMMDD
+
+  # --- M. Industry Index / Hot Search ---
+  - id: stock_board_industry_index_ths
+    source_domain: 10jqka.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: [symbol] # "881121" - This is for a specific industry, needs iteration
+
+  - id: stock_hot_search_baidu
+    source_domain: baidu.com
+    freq: D
+    scope: market_wide
+    avail_rule: T_day_1500
+    params: []
+
+  # --- N. Bonds & Yield Curve ---
+  - id: bond_cash_summary_sse
+    source_domain: sse.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: [symbol] # "1" or "5"
+
+  - id: bond_deal_summary_sse
+    source_domain: sse.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: []
+
+  - id: bond_china_yield
+    source_domain: chinabond.com.cn
+    freq: D
+    scope: market_wide_single_day
+    avail_rule: T_day_1500
+    params: [start_date, end_date] # YYYY-MM-DD
+
+  # --- P. Fund Industry Allocation ---
+  - id: fund_report_stock_cninfo
+    source_domain: cninfo.com.cn
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [symbol, date] # symbol="000001", date="2023"
+
+  - id: fund_report_industry_allocation_cninfo
+    source_domain: cninfo.com.cn
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [date] # "2023"
+
+  # --- Q. Macro Calendar ---
+  - id: macro_info_ws
+    source_domain: wsj.com
+    freq: event
+    scope: market_wide
+    avail_rule: announcement_date
+    params: []
+
+  - id: stock_report_fund_hold_detail
+    source_domain: eastmoney.com
+    freq: Q
+    scope: market_wide_by_report_date
+    avail_rule: announcement_date
+    params: [symbol, date] # symbol="全部", date="2023"

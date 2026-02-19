@@ -1,0 +1,13 @@
+# This file defines the date boundaries for splitting the dataset into
+# training, validation, and test sets.
+# Using fixed dates ensures reproducibility of experiments.
+
+split_boundaries:
+  train_start: '2019-12-30'
+  train_end: '2024-01-01'
+
+  validation_start: '2024-01-03'
+  validation_end: '2025-01-01'
+
+  test_start: '2025-01-01'
+  test_end: '2025-08-15'

@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Data and Logs - these should be tracked in this project's case,
+# but in a real-world scenario they would often be ignored.
+# For now, I will not ignore the data or log directories, but will ignore pycache.

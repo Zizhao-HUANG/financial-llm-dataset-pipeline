@@ -1,0 +1,27 @@
+# This file defines the rate limits, concurrency, and retry policies for accessing
+# live data from different source domains.
+# These settings are crucial for the online data fetching process to avoid being
+# blocked by the data providers.
+# This file is NOT used in the offline bootstrap mode, so it contains placeholder values.
+
+domains:
+  - domain: default
+    concurrency: 200
+    rate: 30 # requests per second
+    capacity: 30 # token bucket capacity
+    retry: 3
+    policy: default_proxy_rotation
+
+  - domain: eastmoney.com
+    concurrency: 200
+    rate: 30
+    capacity: 30
+    retry: 5
+    policy: high_rotation_proxy
+
+  - domain: sina.com.cn
+    concurrency: 200
+    rate: 50
+    capacity: 50
+    retry: 5
+    policy: high_rotation_proxy
